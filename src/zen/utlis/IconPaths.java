@@ -16,7 +16,7 @@
 
 package zen.utlis;
 
-import sample.app.androidlifecycle.*;
+import zen.framework.*;
 
 /**
  * These are system icons that are tied to logging as well.

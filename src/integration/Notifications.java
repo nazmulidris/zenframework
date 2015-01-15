@@ -16,7 +16,7 @@
 
 package integration;
 
-import sample.app.androidlifecycle.*;
+import zen.framework.*;
 
 /**
  * This enum just makes it easy to fire notification, and it allows bundling each
