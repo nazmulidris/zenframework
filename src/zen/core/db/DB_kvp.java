@@ -20,8 +20,8 @@ import android.content.*;
 import android.database.*;
 import android.database.sqlite.*;
 import android.provider.*;
-import integration.*;
 import zen.core.localevent.*;
+import zen.framework.*;
 import zen.utlis.*;
 
 import java.util.*;
@@ -63,7 +63,7 @@ public String remove(long id) {
                                      Schema.SQL_WHERE_COL_ID,
                                      new String[]{String.valueOf(id)});
   if (rowCount > 0) { dbConnection.execSQL(Schema.SQL_PURGE); }
-  LocalEventsManager.fireEvent(ctx, LocalEvents.DB_kvp_Change, dbName, null);
+  LocalEventsManager.fireEvent(ctx, R.id.evt_db_kvp_change, dbName, null);
   return retval;
 }
 
@@ -80,7 +80,7 @@ public String remove(String key) {
                                      Schema.SQL_WHERE_COL_KEY,
                                      new String[]{key});
   if (rowCount > 0) { dbConnection.execSQL(Schema.SQL_PURGE); }
-  LocalEventsManager.fireEvent(ctx, LocalEvents.DB_kvp_Change, dbName, null);
+  LocalEventsManager.fireEvent(ctx, R.id.evt_db_kvp_change, dbName, null);
   return retval;
 }
 
@@ -150,7 +150,7 @@ public long getRowCount() {
 public void removeAll() {
   dbConnection.execSQL(Schema.SQL_DROP_DB);
   dbConnection.execSQL(Schema.SQL_CREATE_DB);
-  LocalEventsManager.fireEvent(ctx, LocalEvents.DB_kvp_Change, dbName, null);
+  LocalEventsManager.fireEvent(ctx, R.id.evt_db_kvp_change, dbName, null);
 }
 
 /**
@@ -296,7 +296,7 @@ public void test() {
  * updates the row with the new payload, and returns the old payload
  *
  * @return null means that the row with given id couldn't be found,
- *         otherwise return the old value of {@link Schema#COL_VALUE} before the update.
+ * otherwise return the old value of {@link Schema#COL_VALUE} before the update.
  */
 public String update(long id, String newPayload) {
   ContentValues map = new ContentValues();
@@ -307,7 +307,7 @@ public String update(long id, String newPayload) {
                         map,
                         Schema.SQL_WHERE_COL_ID,
                         new String[]{String.valueOf(id)});
-    LocalEventsManager.fireEvent(ctx, LocalEvents.DB_kvp_Change, dbName, null);
+    LocalEventsManager.fireEvent(ctx, R.id.evt_db_kvp_change, dbName, null);
   }
   return retval;
 }
@@ -316,7 +316,7 @@ public String update(long id, String newPayload) {
  * updates the row with the new payload, and returns the old payload
  *
  * @return null means that the row with the given key couldn't be found,
- *         otherwise return the old value of {@link Schema#COL_VALUE} before th update.
+ * otherwise return the old value of {@link Schema#COL_VALUE} before th update.
  */
 public String update(String key, String newValue) {
   ContentValues map = new ContentValues();
@@ -327,7 +327,7 @@ public String update(String key, String newValue) {
                         map,
                         Schema.SQL_WHERE_COL_KEY,
                         new String[]{key});
-    LocalEventsManager.fireEvent(ctx, LocalEvents.DB_kvp_Change, dbName, null);
+    LocalEventsManager.fireEvent(ctx, R.id.evt_db_kvp_change, dbName, null);
   }
   return retval;
 }
@@ -337,7 +337,7 @@ public String update(String key, String newValue) {
  * payload (in the table) which is returned.
  *
  * @return -1 means that an error occurred, otherwise
- *         returns the {@link Schema#COL_ID} value for the newly created row
+ * returns the {@link Schema#COL_ID} value for the newly created row
  *
  * @throws IllegalArgumentException if the key or value is null
  */
@@ -347,7 +347,7 @@ public long add(String key, String value) {
   map.put(Schema.COL_KEY, key);
   map.put(Schema.COL_VALUE, value);
   long rowId = dbConnection.replace(Schema.TABLE_MAP, null, map);
-  LocalEventsManager.fireEvent(ctx, LocalEvents.DB_kvp_Change, dbName, null);
+  LocalEventsManager.fireEvent(ctx, R.id.evt_db_kvp_change, dbName, null);
   return rowId;
 }
 
@@ -412,4 +412,4 @@ public static class Schema extends SQLiteOpenHelper implements DBConstantsIF {
 
 }//end class Schema
 
-}//end class DB_blob
+}//end class DB_kvp

@@ -17,7 +17,6 @@
 package zen.core.db;
 
 import android.content.*;
-import integration.*;
 import zen.core.*;
 import zen.utlis.*;
 
@@ -28,60 +27,75 @@ import java.util.*;
  * in order to be used (it's not static). You can reference it via {@link AppData#dbManager}
  * instance variable.
  * <p/>
- * The enums {@link DB_blob_enum} and {@link DB_kvp_enum} make it really easy to declare your desired
- * databases, and these will all be created when this class is instantiated by it's constructor. All
- * the lifecycle stuff is tied to {@link AppData} and it takes care of creation and destruction of
+ * The resource IDs (R.id) for
+ * blobs {@link AppData.ID_Types#Database_BLOB} &
+ * kvps {@link AppData.ID_Types#Database_KVP}
+ * make it really easy to declare your desired
+ * databases, and these will all be created when this class is instantiated by it's constructor.
+ * <p/>
+ * All the lifecycle stuff is tied to {@link AppData} and it takes care of creation and destruction of
  * all the database resources.
  */
 public class DBManager implements DBConstantsIF {
 
-/** stores db connections to all dbs declared in {@link DB_blob_enum} */
-private HashMap<DB_blob_enum, DB_blob> DB_blob_map = new HashMap<DB_blob_enum, DB_blob>();
-/** stores db connections to all dbs declared in {@link DB_kvp_enum} */
-private HashMap<DB_kvp_enum, DB_kvp>   DB_kvp_map  = new HashMap<DB_kvp_enum, DB_kvp>();
+protected final String[] db_blob_IDs;
+protected final String[] db_kvp_IDs;
+/** stores db connections to all dbs declared in R.id blobs {@link AppData.ID_Types#Database_BLOB} */
+private HashMap<String, DB_blob> DB_blob_map = new HashMap<String, DB_blob>();
+/** stores db connections to all dbs declared in R.id kvps {@link AppData.ID_Types#Database_KVP} */
+private HashMap<String, DB_kvp>  DB_kvp_map  = new HashMap<String, DB_kvp>();
 
 /**
- * create all the declared dbs (kvp & blob) in the following enums -
- * {@link DB_kvp_enum} and {@link DB_blob_enum}
+ * create all the declared dbs (kvp & blob) in the R.id for
+ * blobs {@link AppData.ID_Types#Database_BLOB} &
+ * kvps {@link AppData.ID_Types#Database_KVP}
  */
-public DBManager(Context ctx) {
-  for (DB_blob_enum dbEnum : DB_blob_enum.values()) {
-    DB_blob_map.put(dbEnum, new DB_blob(ctx, dbEnum.name(), DbVersion));
+public DBManager(Context ctx, AppData data) {
+  db_blob_IDs = data.getResourceIds(AppData.ID_Types.Database_BLOB);
+  for (String dbBlob_Name : db_blob_IDs) {
+    DB_blob_map.put(dbBlob_Name, new DB_blob(ctx, dbBlob_Name, DbVersion));
   }
 
-  for (DB_kvp_enum dbEnum : DB_kvp_enum.values()) {
-    DB_kvp_map.put(dbEnum, new DB_kvp(ctx, dbEnum.name(), DbVersion));
+  db_kvp_IDs = data.getResourceIds(AppData.ID_Types.Database_KVP);
+  for (String dbKVP_name : db_kvp_IDs) {
+    DB_kvp_map.put(dbKVP_name, new DB_kvp(ctx, dbKVP_name, DbVersion));
   }
-}
 
-/** get a reference to the {@link DB_blob} that's bound to this {@link DB_blob_enum} */
-public DB_blob getDB(DB_blob_enum dbEnum) {
-  return DB_blob_map.get(dbEnum);
-}
-
-/** get a reference to the {@link DB_kvp} that's bound to this {@link DB_kvp_enum} */
-public DB_kvp getDB(DB_kvp_enum dbEnum) {
-  return DB_kvp_map.get(dbEnum);
 }
 
 /**
- * test all the declared dbs (kvp & blob) in the following enums -
- * {@link DB_kvp_enum} and {@link DB_blob_enum}
+ * get a reference to the {@link DB_blob} that's bound to this in the R.id for
+ * blobs {@link AppData.ID_Types#Database_BLOB}
+ */
+public DB_blob getDB_BLOB(String dbName) {
+  return DB_blob_map.get(dbName);
+}
+
+/**
+ * get a reference to the {@link DB_kvp} that's bound to this in the R.id for
+ * kvps {@link AppData.ID_Types#Database_KVP}
+ */
+public DB_kvp getDB_KVP(String dbName) {
+  return DB_kvp_map.get(dbName);
+}
+
+/**
+ * test all the declared dbs (kvp & blob)
  */
 public void test() {
-  for (DB_blob_enum dbEnum : DB_blob_enum.values()) {
-    getDB(dbEnum).test();
+  for (String dbEnum : db_kvp_IDs) {
+    getDB_KVP(dbEnum).test();
   }
 
-  for (DB_kvp_enum dbEnum : DB_kvp_enum.values()) {
-    getDB(dbEnum).test();
+  for (String dbEnum : db_blob_IDs) {
+    getDB_BLOB(dbEnum).test();
   }
 }
 
 /**
- * shutdown all the declared dbs (kvp & blob) in the following enums -
- * {@link DB_kvp_enum} and {@link DB_blob_enum} and stored in
- * {@link #DB_kvp_map} and {@link #DB_blob_map}.
+ * shutdown all the declared dbs (kvp & blob) in the R.id for
+ * blobs {@link AppData.ID_Types#Database_BLOB} &
+ * kvps {@link AppData.ID_Types#Database_KVP}
  * <p/>
  * This is deprecated because the maps are no longer static. The initial implementation
  * used static maps, which is why there was this explicit release mechanism; this is
@@ -91,12 +105,12 @@ public void test() {
 @Deprecated
 public void shutdown() {
 
-  for (DB_blob_enum dbEnum : DB_blob_enum.values()) {
-    getDB(dbEnum).shutdown();
+  for (String dbEnum : db_kvp_IDs) {
+    getDB_KVP(dbEnum).shutdown();
   }
 
-  for (DB_kvp_enum dbEnum : DB_kvp_enum.values()) {
-    getDB(dbEnum).shutdown();
+  for (String dbEnum : db_blob_IDs) {
+    getDB_BLOB(dbEnum).shutdown();
   }
 
   DB_kvp_map.clear();

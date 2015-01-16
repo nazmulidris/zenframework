@@ -19,13 +19,13 @@ package zen.core.localevent;
 import android.content.*;
 import android.os.*;
 import android.support.v4.content.*;
-import integration.*;
 import zen.core.*;
+import zen.framework.*;
 import zen.utlis.*;
 
 /**
  * This is a helper class that makes it easy to fire local events using {@link LocalBroadcastManager}.
- * It also works hand in hand with {@link LocalEvents} enum that defines all the local events.
+ * It also works hand in hand with {@link AppData.ID_Types#LocalEvents} R.ids that defines all the local events.
  * It also uses {@link IntentHelper} to make the magic of passing objects around between activities
  * and services happen.
  *
@@ -42,13 +42,13 @@ enum PayloadKeys {
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // history stuff
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-private static SoftHashMap<LocalEvents, String> localHistory = new SoftHashMap<LocalEvents, String>();
+private static SoftHashMap<String, String> localHistory = new SoftHashMap<String, String>();
 
-public static boolean historyEntryExistsFor(LocalEvents event) {
+public static boolean historyEntryExistsFor(String event) {
   return localHistory.containsKey(event);
 }
 
-public static String getLastPayloadFor(LocalEvents event) {
+public static String getLastPayloadFor(String event) {
   try {
     return localHistory.get(event);
   }
@@ -59,7 +59,7 @@ public static String getLastPayloadFor(LocalEvents event) {
 
 private static void _saveHistory(String name, String payload1) {
   try {
-    localHistory.put(LocalEvents.valueOf(name), payload1 != null ? payload1 : "");
+    localHistory.put(name, payload1 != null ? payload1 : "");
   }
   catch (Exception e) {}
 }
@@ -131,28 +131,31 @@ private static Intent _getIntent(String name, String stringPayload, Object objec
  * <p/>
  * {@link LocalEventsListener#onReceive(String, Object, Bundle)} is on the other side of this method.
  *
+ * @param id            this is an R.id of this kind {@link AppData.ID_Types#LocalEvents}
  * @param stringPayload can be null
  * @param objectPayload can be null
  */
-public static void fireEvent(Context ctx, LocalEvents type, String stringPayload, Object objectPayload) {
+public static void fireEvent(Context ctx, int id, String stringPayload, Object objectPayload) {
+  String name = String.valueOf(id);
+
   // fire actual event
   LocalBroadcastManager.getInstance(ctx).sendBroadcast(
-      _getIntent(type.name(), stringPayload, objectPayload)
+      _getIntent(name, stringPayload, objectPayload)
   );
 
   // fire debug event
   if (PerfDirectives.EnableDebugMode) {
     LocalBroadcastManager.getInstance(ctx).sendBroadcast(
-        _getIntent(LocalEvents.Debug.name(),
+        _getIntent(String.valueOf(R.id.evt_debug),
                    null,
-                   new DebugEventHolder(type, stringPayload, objectPayload))
+                   new DebugEventHolder(name, stringPayload, objectPayload))
     );
   }
 
   // log it
   AndroidUtils.log(IconPaths.LocalEvents,
                    String.format("LocalEventsManager - fired event type[%s] stringPayload[%s] objectPayload[%s]",
-                                 type.name(), stringPayload, objectPayload
+                                 name, stringPayload, objectPayload
                    )
   );
 
@@ -160,12 +163,12 @@ public static void fireEvent(Context ctx, LocalEvents type, String stringPayload
 
 public static class DebugEventHolder {
 
-  public LocalEvents type;
-  public String      stringPayload;
-  public Object      objectPayload;
+  public String name;
+  public String stringPayload;
+  public Object objectPayload;
 
-  public DebugEventHolder(LocalEvents type, String stringPayload, Object objectPayload) {
-    this.type = type;
+  public DebugEventHolder(String name, String stringPayload, Object objectPayload) {
+    this.name = name;
     this.stringPayload = stringPayload;
     this.objectPayload = objectPayload;
   }
@@ -180,9 +183,9 @@ public static class DebugEventHolder {
  * this actually registers the given listener to the {@link LocalBroadcastManager} for the intents
  * that match the {@link IntentFilter}.
  */
-public static void registerBroadcastReceiver(Context ctx, LocalEvents type, BroadcastReceiver listener) {
+public static void registerBroadcastReceiver(Context ctx, String name, BroadcastReceiver listener) {
   LocalBroadcastManager.getInstance(ctx)
-                       .registerReceiver(listener, new IntentFilter(type.name()));
+                       .registerReceiver(listener, new IntentFilter(name));
 }
 
 /** this actually unregisters the given listener from the {@link LocalBroadcastManager} */

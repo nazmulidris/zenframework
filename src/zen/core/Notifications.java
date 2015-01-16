@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package integration;
+package zen.core;
 
 import zen.framework.*;
 

@@ -19,7 +19,6 @@ package zen.core.localevent;
 import android.content.*;
 import android.os.*;
 import android.support.v4.content.*;
-import integration.*;
 import zen.core.*;
 import zen.utlis.*;
 
@@ -37,14 +36,14 @@ public abstract class LocalEventsListener extends BroadcastReceiver {
 // abstract
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-/** define what {@link LocalEvents} you are interested in */
-public abstract LocalEvents getLocalEvent();
+/** define what {@link AppData.ID_Types#LocalEvents} R.ids you are interested in */
+public abstract int getLocalEventId();
 
 /** used to identify this observer */
 public abstract String getName();
 
 /**
- * override this in subclass to do something when {@link #getLocalEvent()} is received
+ * override this in subclass to do something when {@link #getLocalEventId()} ()} is received
  *
  * @param stringPayload might be null
  * @param objectPayload might be null
@@ -75,7 +74,7 @@ public void onReceive(Context context, Intent intent) {
 /** call this to register this listener with the {@link LocalBroadcastManager} */
 public void register(Context ctx) {
   try {
-    LocalEventsManager.registerBroadcastReceiver(ctx, getLocalEvent(), this);
+    LocalEventsManager.registerBroadcastReceiver(ctx, String.valueOf(getLocalEventId()), this);
   }
   catch (Exception e) {
     AndroidUtils.logErr(

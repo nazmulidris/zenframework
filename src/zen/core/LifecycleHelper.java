@@ -119,9 +119,10 @@ public void addResource(Object... resourceRay) {
       Object resource = resourceRay[i];
       if (resource == null) {
         AndroidUtils.logErr(IconPaths.Resource, String.format(
-            "LifecycleHelper [%s] - warning attempting to add a resource[#%s] param, but it's null or empty!",
-            name,
-            i)
+                                "LifecycleHelper [%s] - warning attempting to add a resource[#%s] param, but it's " +
+                                "null or empty!",
+                                name,
+                                i)
         );
       }
       else {_bindResource(resource);}
@@ -236,7 +237,7 @@ private void _releaseResource(Object resource) {
                        String.format("LifecycleHelper [%s] - unregistered LocalEventsListener [%s] for event [%s]",
                                      name,
                                      localBroadcastReceiver.getName(),
-                                     localBroadcastReceiver.getLocalEvent()
+                                     localBroadcastReceiver.getLocalEventId()
                        )
       );
     }
@@ -251,7 +252,7 @@ private void _releaseResource(Object resource) {
                            "[%s]",
                            name,
                            observer.getName(),
-                           observer.getProperty()
+                           observer.getPropertyId()
                        )
       );
     }
@@ -279,7 +280,7 @@ private void _bindResource(Object resource) {
                        String.format("LifecycleHelper [%s] - registered LocalEventsListener [%s] for event [%s]",
                                      name,
                                      localBroadcastReceiver.getName(),
-                                     localBroadcastReceiver.getLocalEvent()
+                                     localBroadcastReceiver.getLocalEventId()
                        )
       );
     }
@@ -292,7 +293,7 @@ private void _bindResource(Object resource) {
                            "LifecycleHelper [%s] - registered ObservablePropertyListener [%s] for property [%s]",
                            name,
                            observer.getName(),
-                           observer.getProperty()
+                           observer.getPropertyId()
                        )
       );
     }

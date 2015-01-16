@@ -17,7 +17,7 @@
 package zen.core.observableprops;
 
 import android.os.*;
-import integration.*;
+import android.util.*;
 import zen.core.*;
 import zen.utlis.*;
 
@@ -26,8 +26,8 @@ import java.util.*;
 import static zen.utlis.IconPaths.*;
 
 /**
- * This class works hand in hand with {@link ObservableProperty} enum, which contains all the
- * properties for the app.
+ * This class works hand in hand with  {@link AppData.ID_Types#ObservableProperty} R.ids,
+ * which contains all the properties for the app.
  *
  * @author Nazmul Idris
  * @version 1.0
@@ -35,12 +35,18 @@ import static zen.utlis.IconPaths.*;
  */
 public class ObservablePropertyManager {
 
-/** this map actually holds the key value pairs, where the keys are the enum {@link ObservableProperty} */
-private HashMap<ObservableProperty, Object>                                mapOfFieldValues    =
-    new HashMap<ObservableProperty, Object>();
-/** this map actually holds the list of listeners for each key. the key is is the enum {@link ObservableProperty} */
-private HashMap<ObservableProperty, ArrayList<ObservablePropertyListener>> mapOfFieldObservers =
-    new HashMap<ObservableProperty, ArrayList<ObservablePropertyListener>>();
+/**
+ * this map actually holds the key value pairs, where the keys are the
+ * {@link AppData.ID_Types#ObservableProperty} R.ids
+ */
+private SparseArray<Object>                                mapOfFieldValues    =
+    new SparseArray<Object>();
+/**
+ * this map actually holds the list of listeners for each key. the key is
+ * {@link AppData.ID_Types#ObservableProperty} R.ids
+ */
+private SparseArray<ArrayList<ObservablePropertyListener>> mapOfFieldObservers =
+    new SparseArray<ArrayList<ObservablePropertyListener>>();
 private Handler handlerMainThread;
 
 public ObservablePropertyManager(Handler handler) {
@@ -49,8 +55,8 @@ public ObservablePropertyManager(Handler handler) {
 
 /**
  * this adds the {@link ObservablePropertyListener} to the property, and it also fires the
- * {@link ObservablePropertyListener#onChange(String, Object)} method, if the
- * {@link #getValue(ObservableProperty, Object)} or defaultValue is NOT null.
+ * {@link ObservablePropertyListener#onChange(int, Object)} method, if the
+ * {@link #getValue(int, Object)} or defaultValue is NOT null.
  * <p/>
  * Notes:
  * <ol>
@@ -77,16 +83,16 @@ public ObservablePropertyListener addPropertyChangeObserver(ObservablePropertyLi
 
   try {
     // get the property in question from the observer
-    ObservableProperty property = observer.getProperty();
+    int propertyId = observer.getPropertyId();
 
     // get the list if it exists, or create a new one & save it
     ArrayList<ObservablePropertyListener> observersForProperty;
-    if (mapOfFieldObservers.containsKey(property)) {
-      observersForProperty = mapOfFieldObservers.get(property);
+    if (mapOfFieldObservers.indexOfKey(propertyId) > 0) {
+      observersForProperty = mapOfFieldObservers.get(propertyId);
     }
     else {
       observersForProperty = new ArrayList<ObservablePropertyListener>();
-      mapOfFieldObservers.put(property, observersForProperty);
+      mapOfFieldObservers.put(propertyId, observersForProperty);
     }
 
     // check for dupes!
@@ -96,26 +102,26 @@ public ObservablePropertyListener addPropertyChangeObserver(ObservablePropertyLi
     observersForProperty.add(observer);
     AndroidUtils.log(MyApp,
                      String.format("ObservableProperty.[%s] property change observer [%s] added",
-                                   property.name(),
+                                   propertyId,
                                    observer.getName()));
 
     // fire the onChange method on this observer (if the value isn't null!)
-    Object value = getValue(property, defaultValue);
+    Object value = getValue(propertyId, defaultValue);
     if (value != null) {
       try {
-        observer.onChange(property.name(), value);
+        observer.onChange(propertyId, value);
       }
       catch (Exception e) {
         AndroidUtils.logErr(
             MyApp,
             String.format("ObservableProperty.[%s] problem running property change observer [%s]",
-                          property.name(),
+                          propertyId,
                           observer.getName()),
             e);
       }
       AndroidUtils.log(MyApp,
                        String.format("ObservableProperty.[%s] property change observer [%s] fired",
-                                     property.name(),
+                                     propertyId,
                                      observer.getName())
       );
     }
@@ -125,7 +131,7 @@ public ObservablePropertyListener addPropertyChangeObserver(ObservablePropertyLi
   catch (Exception e) {
     AndroidUtils.logErr(MyApp,
                         String.format("ObservableProperty.[%s] problem adding listener [%s]",
-                                      observer.getProperty().name(),
+                                      observer.getPropertyId(),
                                       observer.getName())
     );
     return observer;
@@ -137,13 +143,13 @@ public ObservablePropertyListener addPropertyChangeObserver(ObservablePropertyLi
 public void removePropertyChangeObserver(ObservablePropertyListener observer) {
   if (observer == null) { return; }
   try {
-    ArrayList<ObservablePropertyListener> listOfObservers = mapOfFieldObservers.get(observer.getProperty());
+    ArrayList<ObservablePropertyListener> listOfObservers = mapOfFieldObservers.get(observer.getPropertyId());
     if (listOfObservers != null) { listOfObservers.remove(observer); }
   }
   catch (Exception e) {
     AndroidUtils.logErr(MyApp,
                         String.format("ObservableProperty.[%s] problem removing listener [%s]",
-                                      observer.getProperty().name(),
+                                      observer.getPropertyId(),
                                       observer.getName())
     );
   }
@@ -153,19 +159,19 @@ public void removePropertyChangeObserver(ObservablePropertyListener observer) {
  * @return if the {@link #mapOfFieldValues} doesn't contain a value for this field,
  * just return the defaultValue
  */
-public Object getValue(ObservableProperty prop, Object defaultValue) {
+public Object getValue(int propId, Object defaultValue) {
   try {
-    return mapOfFieldValues.get(prop) == null ? defaultValue : mapOfFieldValues.get(prop);
+    return mapOfFieldValues.get(propId) == null ? defaultValue : mapOfFieldValues.get(propId);
   }
   catch (Exception e) {
     return null;
   }
 }
 
-/** just a refinement of {@link #getValue(ObservableProperty, Object)} that casts the object as boolean */
-public boolean getValueAsBoolean(ObservableProperty prop) {
+/** just a refinement of {@link #getValue(int, Object)} that casts the object as boolean */
+public boolean getValueAsBoolean(int propId) {
   try {
-    return (Boolean) getValue(prop, Boolean.FALSE);
+    return (Boolean) getValue(propId, Boolean.FALSE);
   }
   catch (Exception e) {
     return false;
@@ -178,9 +184,9 @@ public boolean getValueAsBoolean(ObservableProperty prop) {
  * @return true if the property contains a value and it's equal to the given value
  */
 
-public boolean valueEquals(ObservableProperty prop, Object compareToValue, Object defaultValue) {
+public boolean valueEquals(int propId, Object compareToValue, Object defaultValue) {
   try {
-    return getValue(prop, defaultValue).equals(compareToValue);
+    return getValue(propId, defaultValue).equals(compareToValue);
   }
   catch (Exception e) {return false;}
 }
@@ -196,51 +202,47 @@ public boolean valueEquals(ObservableProperty prop, Object compareToValue, Objec
  * <li>if the value is different than what's been set already</li>
  * </ol>
  *
- * @param property this can't be null! will throw IllegalArgumentException if it is.
- * @param value    this can't be null! will throw IllegalArgumentException if it is.
+ * @param propertyId this can't be null! will throw IllegalArgumentException if it is.
+ * @param value      this can't be null! will throw IllegalArgumentException if it is.
  */
-public void setValue(final ObservableProperty property, final Object value) throws IllegalArgumentException {
-
-  // property can't be null
-  if (property == null) {
-    throw new IllegalArgumentException("property can't be null!");
-  }
+public void setValue(final int propertyId, final Object value) throws IllegalArgumentException {
 
   // value can't be null
   if (value == null) {
     throw new IllegalArgumentException(
-        String.format("value for property [%s] can't be null!",
-                      property.name()));
+        String.format("value for propertyId [%s] can't be null!",
+                      propertyId));
   }
 
   try {
     // check to see if the value already exists and is the same
-    if (mapOfFieldValues.containsKey(property)) {
-      if (mapOfFieldValues.get(property).equals(value)) { return; }
+    if (mapOfFieldValues.indexOfKey(propertyId) > 0) {
+      if (mapOfFieldValues.get(propertyId).equals(value)) { return; }
     }
 
     // value does not exist, or is not the same, so save it, and send out update event
-    mapOfFieldValues.put(property, value);
+    mapOfFieldValues.put(propertyId, value);
 
-    if (mapOfFieldObservers.containsKey(property)) {
-      ArrayList<ObservablePropertyListener> listOfObservers = mapOfFieldObservers.get(property);
+    if (mapOfFieldObservers.indexOfKey(propertyId) > 0) {
+      ArrayList<ObservablePropertyListener> listOfObservers = mapOfFieldObservers.get(propertyId);
       for (final ObservablePropertyListener observer : listOfObservers) {
         handlerMainThread.post(new Runnable() {
           public void run() {
             try {
-              observer.onChange(property.name(), value);
+              observer.onChange(propertyId, value);
             }
             catch (Exception e) {
               AndroidUtils.logErr(
                   MyApp,
-                  String.format("ObservableProperty.[%s] problem running property change observer [%s]",
-                                property.name(),
+                  String.format("ObservableProperty.[%s] problem running propertyId change observer [%s]",
+                                propertyId,
                                 observer.getName()),
                   e);
             }
             AndroidUtils.log(MyApp,
-                             String.format("ObservableProperty.[%s] property changed to [%s], and listener [%s] fired",
-                                           property.name(),
+                             String.format("ObservableProperty.[%s] propertyId changed to [%s], and listener [%s] " +
+                                           "fired",
+                                           propertyId,
                                            value.toString(),
                                            observer.getName())
             );
@@ -250,8 +252,8 @@ public void setValue(final ObservableProperty property, final Object value) thro
     }
     else {
       AndroidUtils.log(MyApp,
-                       String.format("ObservableProperty.[%s] property changed to [%s], no listeners fired",
-                                     property.name(),
+                       String.format("ObservableProperty.[%s] propertyId changed to [%s], no listeners fired",
+                                     propertyId,
                                      value.toString())
       );
 
@@ -260,7 +262,7 @@ public void setValue(final ObservableProperty property, final Object value) thro
   catch (Exception e) {
     AndroidUtils.logErr(MyApp,
                         String.format("ObservableProperty.[%s] problem setting value [%s]",
-                                      property.name(),
+                                      propertyId,
                                       value.toString())
     );
   }

@@ -84,4 +84,4 @@ protected boolean isRouteDisplayed() {
   return false;
 }
 
-}//end class SimpleFragmentActivity
+}//end class SimpleActivity

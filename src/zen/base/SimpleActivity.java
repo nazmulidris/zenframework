@@ -18,20 +18,19 @@ package zen.base;
 
 import android.app.*;
 import android.os.*;
-import android.support.v4.app.*;
 import zen.core.*;
 import zen.utlis.*;
 
 /**
- * This is a base class that should be extended whenever a {@link FragmentActivity} is needed. It takes care of
- * a lot of things that are done over and over again, if you subclass {@link FragmentActivity}.
+ * This is a base class that should be extended whenever a {@link Activity} is needed. It takes care of
+ * a lot of things that are done over and over again, if you subclass {@link Activity}.
  *
  * @author Nazmul Idris
  * @version 1.0
  * @since 2/23/13, 4:04 PM
  */
-public abstract class SimpleFragmentActivity
-    extends FragmentActivity
+public abstract class SimpleActivity
+    extends Activity
     implements SimpleContextIF
 {
 
@@ -82,4 +81,4 @@ protected void onDestroy() {
   super.onDestroy();
 }
 
-}//end class SimpleFragmentActivity
+}//end class SimpleActivity

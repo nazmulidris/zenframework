@@ -18,7 +18,6 @@ package zen.core;
 
 import android.app.*;
 import android.content.*;
-import integration.*;
 
 /**
  * This class makes it easy to work with {@link Notification} objects.

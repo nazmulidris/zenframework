@@ -16,13 +16,19 @@
 
 package zen.core.observableprops;
 
-import integration.*;
+import zen.core.*;
 
-/** Extend this class to observe values for the fields in {@link ObservableProperty}. */
+/**
+ * Extend this class to observe values for the fields in
+ * {@link AppData.ID_Types#ObservableProperty} R.ids
+ */
 public abstract class ObservablePropertyListener {
 
-/** this is what's used to automagically bind this observer to the {@link ObservableProperty}. */
-public abstract ObservableProperty getProperty();
+/**
+ * this is what's used to automagically bind this observer to
+ * the {@link AppData.ID_Types#ObservableProperty} R.ids.
+ */
+public abstract int getPropertyId();
 
 /** this identifies this listener */
 public abstract String getName();
@@ -30,9 +36,9 @@ public abstract String getName();
 /**
  * this method is run on the main thread
  *
- * @param propertyName name of the {@link ObservableProperty} enum
- * @param value        this may be null, if it's not been set yet
+ * @param propertyId the {@link AppData.ID_Types#ObservableProperty} R.id
+ * @param value      this may be null, if it's not been set yet
  */
-public abstract void onChange(String propertyName, Object value);
+public abstract void onChange(int propertyId, Object value);
 
 }

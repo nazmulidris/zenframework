@@ -6,4 +6,10 @@
 
     <uses-sdk android:minSdkVersion="16"/>
 
+    <application
+            android:name="zen.core.AppData"
+            android:theme="@style/MyTheme"
+            >
+    </application>
+
 </manifest>

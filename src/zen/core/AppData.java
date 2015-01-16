@@ -19,10 +19,12 @@ package zen.core;
 import android.app.*;
 import android.content.*;
 import android.os.*;
-import integration.*;
 import zen.core.db.*;
 import zen.core.observableprops.*;
 import zen.utlis.*;
+
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * This is the base {@link Application} class that uses the Zen Framework classes.
@@ -38,8 +40,23 @@ public class AppData extends Application implements ContextHolderIF {
 public DBManager                 dbManager;
 /** this is used to run closures/functors on the main thread */
 public Handler                   handlerMainThread;
-/** used to manage {@link ObservableProperty} enum */
+/** used to manage {@link AppData.ID_Types#ObservableProperty} R.ids */
 public ObservablePropertyManager observablePropertyManager;
+
+public enum ID_Types {
+  Database_BLOB("db_blob_"),
+  Database_KVP("db_kvp_"),
+  ObservableProperty("op_"),
+  LocalEvents("evt_");
+
+  private final String prefix;
+
+  ID_Types(String db) {
+    prefix = db;
+  }
+
+  String getPrefix() {return prefix;}
+}
 
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // android lifecycle hooks
@@ -73,6 +90,7 @@ public void onTerminate() {
  * method!
  */
 public void _init(Handler handler, Context ctx) {
+
   // save a ref to the handler on the main thread
   if (handlerMainThread == null) { handlerMainThread = handler; }
 
@@ -80,12 +98,48 @@ public void _init(Handler handler, Context ctx) {
   if (observablePropertyManager == null) { observablePropertyManager = new ObservablePropertyManager(handler); }
 
   // create the database & register it with {@link #mapOfData} as an observable property
-  if (dbManager == null) {dbManager = new DBManager(ctx);}
+  if (dbManager == null) {dbManager = new DBManager(ctx, this);}
 
   AndroidUtils.log(IconPaths.MyApp,
-                   "AppData.init - created myDbs object and saved it to observable property map");
+                   "AppData.init - created DBManager, and ObservablePropertyManager");
+
 }
 
+public String[] getResourceIds(ID_Types type) {
+  ArrayList<String> retval = new ArrayList<String>();
+  try {
+    String prefix = type.getPrefix();
+    String packageName = getApplicationContext().getPackageName();
+    Field[] fieldRay = Class.forName(String.format("%s.R$id", packageName)).getFields();
+    for (Field field : fieldRay) {
+      String fname = field.getName();
+      if (fname.startsWith(prefix)) { retval.add(fname); }
+    }
+  }
+  catch (ClassNotFoundException e) {
+    e.printStackTrace();
+  }
+  return retval.toArray(new String[retval.size()]);
+}
+
+/**
+ * simply displays the fields in the <current_package>.R.id.class
+ * <a href="http://goo.gl/E5dEkJ">Stackoverflow article on this</a>
+ */
+private void _getResourceIdsTest() {
+  try {
+    String packageName = getApplicationContext().getPackageName();
+    AndroidUtils.log(IconPaths.Debug, String.format("Running in %s", getClass().getName()));
+    AndroidUtils.log(IconPaths.Debug, String.format(">>Package name = %s<<", packageName));
+    Field[] fieldRay = Class.forName(String.format("%s.R$id", packageName)).getFields();
+    for (Field field : fieldRay) {
+      AndroidUtils.log(IconPaths.Debug, field.getName());
+    }
+  }
+  catch (ClassNotFoundException e) {
+    e.printStackTrace();
+  }
+}
 
 //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // framework integration

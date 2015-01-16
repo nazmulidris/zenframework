@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- used to be DB_blob_enum -->
+    <item type="id" name="db_blob_test"/>
+
+    <!-- used to be DB_kvp_enum -->
+    <item type="id" name="db_kvp_test"/>
+
+    <!-- used to be LocalEvents enum -->
+    <item type="id" name="evt_test"/>
+    <item type="id" name="evt_debug"/>
+    <item type="id" name="evt_db_blob_change"/>
+    <item type="id" name="evt_db_kvp_change"/>
+
+    <!-- used to be ObservablePropertyEnum -->
+    <item type="id" name="op_test"/>
+
+</resources>

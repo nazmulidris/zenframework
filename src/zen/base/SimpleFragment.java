@@ -18,7 +18,6 @@ package zen.base;
 
 import android.app.*;
 import android.os.*;
-import android.support.v4.app.Fragment;
 import android.view.*;
 import zen.core.*;
 import zen.utlis.*;

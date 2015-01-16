@@ -41,7 +41,7 @@
     </style>
 
     <!-- can't remove title bar since action bar is in there - http://goo.gl/wKccB -->
-    <style name="MyTheme" parent="@android:style/Theme.Holo">
+    <style name="MyTheme" parent="android:Theme.Holo.Light">
     </style>
 
 </resources>
