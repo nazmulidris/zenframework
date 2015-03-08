@@ -105,6 +105,10 @@ public void _init(Handler handler, Context ctx) {
 
 }
 
+public String getResourceName(int id) {
+  return getApplicationContext().getResources().getResourceEntryName(id);
+}
+
 public String[] getResourceIds(ID_Types type) {
   ArrayList<String> retval = new ArrayList<String>();
   try {

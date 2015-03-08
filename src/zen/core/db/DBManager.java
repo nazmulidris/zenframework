@@ -40,6 +40,7 @@ public class DBManager implements DBConstantsIF {
 
 protected final String[] db_blob_IDs;
 protected final String[] db_kvp_IDs;
+private final   AppData  data;
 /** stores db connections to all dbs declared in R.id blobs {@link AppData.ID_Types#Database_BLOB} */
 private HashMap<String, DB_blob> DB_blob_map = new HashMap<String, DB_blob>();
 /** stores db connections to all dbs declared in R.id kvps {@link AppData.ID_Types#Database_KVP} */
@@ -51,6 +52,9 @@ private HashMap<String, DB_kvp>  DB_kvp_map  = new HashMap<String, DB_kvp>();
  * kvps {@link AppData.ID_Types#Database_KVP}
  */
 public DBManager(Context ctx, AppData data) {
+
+  this.data = data;
+
   db_blob_IDs = data.getResourceIds(AppData.ID_Types.Database_BLOB);
   for (String dbBlob_Name : db_blob_IDs) {
     DB_blob_map.put(dbBlob_Name, new DB_blob(ctx, dbBlob_Name, DbVersion));
@@ -67,6 +71,14 @@ public DBManager(Context ctx, AppData data) {
  * get a reference to the {@link DB_blob} that's bound to this in the R.id for
  * blobs {@link AppData.ID_Types#Database_BLOB}
  */
+public DB_blob getDB_BLOB(int id) {
+  return DB_blob_map.get(data.getResourceName(id));
+}
+
+/**
+ * get a reference to the {@link DB_blob} that's bound to this in the R.id for
+ * blobs {@link AppData.ID_Types#Database_BLOB}
+ */
 public DB_blob getDB_BLOB(String dbName) {
   return DB_blob_map.get(dbName);
 }
@@ -77,6 +89,14 @@ public DB_blob getDB_BLOB(String dbName) {
  */
 public DB_kvp getDB_KVP(String dbName) {
   return DB_kvp_map.get(dbName);
+}
+
+/**
+ * get a reference to the {@link DB_kvp} that's bound to this in the R.id for
+ * kvps {@link AppData.ID_Types#Database_KVP}
+ */
+public DB_kvp getDB_KVP(int id) {
+  return DB_kvp_map.get(data.getResourceName(id));
 }
 
 /**
